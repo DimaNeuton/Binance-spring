@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: Binance-spring
+  datasource:
+    url: jdbc:postgresql://localhost:5432/binance_db
+    username: postgres
+    password: 11127765
+    driver-class-name: org.postgresql.Driver
+
+binance:
+  market:
+    base-url: wss://stream.binance.com:9443/ws
+    symbol: btcusdt
+    stream: trade
+    reconnect-delay: 5s
+    retry-max-attempts: 2147483647
+    retry-initial-delay: 2s
+    retry-max-delay: 60s
+    commission-ratio: 0.00075

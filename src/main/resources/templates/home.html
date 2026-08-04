@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!--<html lang="en">-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Title</title>
+</head>
+<script th:inline="javascript">
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.p) {
+            document.getElementById('price').textContent = data.p;
+        }
+    };
+    ws.onerror = () => console.error('WebSocket error');
+    ws.onclose = () => console.warn('WebSocket closed');
+</script>
+<body>
+    <h1>Welcome to...</h1>
+<!--    <img th:src="@{/images/ata-logo.png}"/>-->
+    <span id="price">—</span>
+    <form method="POST" th:object="${daysNumber}">
+        <div>
+            <h3>Количество дней для выборки</h3>
+            <input type=number th:field="*{number}"/>
+            <span class="validationError"
+                  th:if="${#fields.hasErrors('number')}"
+                  th:errors="*{number}">Number error</span>
+            <br/>
+            <button>Show history</button>
+        </div>
+    </form>
+</body>
+</html>

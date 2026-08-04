@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+</head>
+<body>
+<div id="tradingHistory">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>expTime</th>
+            <th>expType</th>
+            <th>expPrice</th>
+            <th>expVolume</th>
+            <th>expComm</th>
+            <th>expBTC</th>
+            <th>expUSDT</th>
+            <th>expBNB</th>
+            <th>expProfit</th>
+            <th>#</th>
+            <th>time</th>
+            <th>type</th>
+            <th>price</th>
+            <th>volume</th>
+            <th>commission</th>
+            <th>btc</th>
+            <th>usdt</th>
+            <th>bnb</th>
+            <th>timeSlippage</th>
+            <th>priceSlippage</th>
+            <th>profit</th>
+        </tr>
+        </thead>
+        <tbody id="body">
+        <tr th:each="row : ${history}">
+            <td th:text="${row.expectedId}">1</td>
+            <td th:text="${#temporals.format(row.expectedTime, 'yyyy-MM-dd HH:mm:ss')}">time</td>
+            <td th:text="${row.expectedType}">buy</td>
+            <td th:text="${row.expectedPrice}">price</td>
+            <td th:text="${row.expectedVolume}">qty</td>
+            <td th:text="${row.expectedCommission}">commission</td>
+            <td th:text="${row.expectedBtc}">btc</td>
+            <td th:text="${row.expectedUsdt}">usdt</td>
+            <td th:text="${row.expectedBnb}">bnb</td>
+            <td th:text="${row.expectedProfit}">usdt</td>
+            <td th:text="${row.id != null ? row.id : '—'}">1</td>
+            <td th:text="${row.time != null ? #temporals.format(row.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
+            <td th:text="${row.type != null ? row.type : '—'}">buy</td>
+            <td th:text="${row.price != null ? row.price : '—'}">price</td>
+            <td th:text="${row.volume != null ? row.volume : '—'}">qty</td>
+            <td th:text="${row.commission != null ? row.commission : '—'}">commission</td>
+            <td th:text="${row.btc != null ? row.btc : '—'}">btc</td>
+            <td th:text="${row.usdt != null ? row.usdt : '—'}">usdt</td>
+            <td th:text="${row.bnb != null ? row.bnb : '—'}">bnb</td>
+            <td th:text="${row.timeSlippage != null ? row.timeSlippage : '—'}">time slippage</td>
+            <td th:text="${row.priceSlippage != null ? row.priceSlippage : '—'}">price slippage</td>
+            <td th:text="${row.profit != null ? row.profit : '—'}">usdt</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
