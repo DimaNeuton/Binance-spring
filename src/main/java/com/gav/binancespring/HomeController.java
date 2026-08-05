@@ -1,8 +1,7 @@
 package com.gav.binancespring;
 
-import com.gav.binancespring.database.TradingRepository;
+import com.gav.binancespring.repository.TradingRepository;
 import com.gav.binancespring.dto.DaysNumber;
-import com.gav.binancespring.dto.TradeHistory;
 import com.gav.binancespring.dto.TradeHistoryRow;
 
 import jakarta.validation.Valid;
@@ -15,9 +14,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 @Controller

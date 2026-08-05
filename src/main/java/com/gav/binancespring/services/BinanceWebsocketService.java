@@ -2,6 +2,8 @@ package com.gav.binancespring.services;
 
 import com.gav.binancespring.config.BinanceMarketProperties;
 import jakarta.annotation.PreDestroy;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -20,20 +22,16 @@ import tools.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.time.Duration;
 
+@RequiredArgsConstructor
 @Component
+@Slf4j
 public class BinanceWebsocketService implements ApplicationRunner {
-    private static final Logger log = LoggerFactory.getLogger(BinanceWebsocketService.class);
+    private Disposable connection;
 
     private final WebSocketClient webSocketClient;
     private final ObjectMapper objectMapper;
-    private Disposable connection;
     private final BinanceMarketProperties properties;
-
-    public BinanceWebsocketService(WebSocketClient webSocketClient, ObjectMapper objectMapper, BinanceMarketProperties properties) {
-        this.webSocketClient = webSocketClient;
-        this.objectMapper = objectMapper;
-        this.properties = properties;
-    }
+    private final TradeService tradeService;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -62,12 +60,13 @@ public class BinanceWebsocketService implements ApplicationRunner {
         return session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
                 .timeout(Duration.ofSeconds(10))
-                .doOnNext(this::handleMessage)
+                .doOnNext(tradeService::handleMessage)
                 .doOnError(e -> log.error("Ошибка в потоке сообщений", e))
                 .onErrorResume(e -> Mono.empty())
                 .then();
     }
 
+    //TODO это уйдет в трейд сервис
     private void handleMessage(String json) {
         try {
             JsonNode root = objectMapper.readTree(json);

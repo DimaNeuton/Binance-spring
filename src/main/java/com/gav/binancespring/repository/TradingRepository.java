@@ -1,8 +1,8 @@
-package com.gav.binancespring.database;
+package com.gav.binancespring.repository;
 
 import com.gav.binancespring.dto.TradeHistoryRow;
 import com.gav.binancespring.entities.Balance;
-import com.gav.binancespring.entities.ExpectedTransaction;
+//import com.gav.binancespring.entities.ExpectedTransaction;
 import com.gav.binancespring.entities.LastBotCondition;
 import com.gav.binancespring.entities.Transaction;
 import org.springframework.jdbc.core.JdbcTemplate;
