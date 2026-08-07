@@ -6,12 +6,15 @@ spring:
     username: postgres
     password: 11127765
     driver-class-name: org.postgresql.Driver
+  jpa:
+    properties.hibernate:
+      show_sql: true
+      format_sql: true
+      hbm2ddl.auto: validate
 
 binance:
   market:
-    base-url: wss://stream.binance.com:9443/ws
-    symbol: btcusdt
-    stream: trade
+    url: wss://stream.binance.com:9443/stream?streams=btcusdt@trade/bnbusdt@trade
     reconnect-delay: 5s
     retry-max-attempts: 2147483647
     retry-initial-delay: 2s

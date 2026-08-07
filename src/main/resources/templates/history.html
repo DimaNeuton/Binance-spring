@@ -11,16 +11,6 @@
         <thead>
         <tr>
             <th>#</th>
-            <th>expTime</th>
-            <th>expType</th>
-            <th>expPrice</th>
-            <th>expVolume</th>
-            <th>expComm</th>
-            <th>expBTC</th>
-            <th>expUSDT</th>
-            <th>expBNB</th>
-            <th>expProfit</th>
-            <th>#</th>
             <th>time</th>
             <th>type</th>
             <th>price</th>
@@ -36,16 +26,6 @@
         </thead>
         <tbody id="body">
         <tr th:each="row : ${history}">
-            <td th:text="${row.expectedId}">1</td>
-            <td th:text="${#temporals.format(row.expectedTime, 'yyyy-MM-dd HH:mm:ss')}">time</td>
-            <td th:text="${row.expectedType}">buy</td>
-            <td th:text="${row.expectedPrice}">price</td>
-            <td th:text="${row.expectedVolume}">qty</td>
-            <td th:text="${row.expectedCommission}">commission</td>
-            <td th:text="${row.expectedBtc}">btc</td>
-            <td th:text="${row.expectedUsdt}">usdt</td>
-            <td th:text="${row.expectedBnb}">bnb</td>
-            <td th:text="${row.expectedProfit}">usdt</td>
             <td th:text="${row.id != null ? row.id : '—'}">1</td>
             <td th:text="${row.time != null ? #temporals.format(row.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
             <td th:text="${row.type != null ? row.type : '—'}">buy</td>

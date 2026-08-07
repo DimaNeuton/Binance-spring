@@ -20,6 +20,12 @@
     <h1>Welcome to...</h1>
 <!--    <img th:src="@{/images/ata-logo.png}"/>-->
     <span id="price">—</span>
+    <h1>BTC</h1>
+    <h2 id="btc" th:text="${balance.btc}">—</h2>
+    <h1>USDT</h1>
+    <h2 id="usdt" th:text="${balance.usdt}">—</h2>
+    <h1>BNB</h1>
+    <h2 id="bnb" th:text="${balance.bnb}">—</h2>
     <form method="POST" th:object="${daysNumber}">
         <div>
             <h3>Количество дней для выборки</h3>

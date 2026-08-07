@@ -8,19 +8,10 @@ import java.util.stream.Stream;
 
 @ConfigurationProperties(prefix = "binance.market")
 public record BinanceMarketProperties(
-        String baseUrl,
-        String symbol,
-        String stream,
+        String url,
         Duration reconnectDelay,
         int retryMaxAttempts,
         Duration retryInitialDelay,
         Duration retryMaxDelay,
         BigDecimal commissionRatio) {
-
-
-    public String streamUrl() {
-        return baseUrl + "/" + symbol + "@" + stream;
-    }
-
-
 }

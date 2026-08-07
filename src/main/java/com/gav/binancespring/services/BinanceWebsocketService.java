@@ -29,7 +29,6 @@ public class BinanceWebsocketService implements ApplicationRunner {
     private Disposable connection;
 
     private final WebSocketClient webSocketClient;
-    private final ObjectMapper objectMapper;
     private final BinanceMarketProperties properties;
     private final TradeService tradeService;
 
@@ -39,7 +38,7 @@ public class BinanceWebsocketService implements ApplicationRunner {
     }
 
     private Flux<Void> connectWithReconnect() {
-        URI uri = URI.create(properties.streamUrl());
+        URI uri = URI.create(properties.url());
 
         return webSocketClient
                 .execute(uri, this::handleSession)
@@ -64,19 +63,6 @@ public class BinanceWebsocketService implements ApplicationRunner {
                 .doOnError(e -> log.error("Ошибка в потоке сообщений", e))
                 .onErrorResume(e -> Mono.empty())
                 .then();
-    }
-
-    //TODO это уйдет в трейд сервис
-    private void handleMessage(String json) {
-        try {
-            JsonNode root = objectMapper.readTree(json);
-
-            if (root.has("p")) {
-                String price = root.get("p").asText();
-            }
-        }catch (Exception e){
-            log.warn("Не удалось разобрать сообщение: {}", json, e);
-        }
     }
 
     @PreDestroy

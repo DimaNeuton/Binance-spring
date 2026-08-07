@@ -1,9 +1,11 @@
 package com.gav.binancespring;
 
-import com.gav.binancespring.repository.TradingRepository;
+import com.gav.binancespring.entities.Balance;
+import com.gav.binancespring.entities.Transaction;
+import com.gav.binancespring.repository.BalanceRepository;
 import com.gav.binancespring.dto.DaysNumber;
-import com.gav.binancespring.dto.TradeHistoryRow;
 
+import com.gav.binancespring.repository.TransactionRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,27 +16,34 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
 @SessionAttributes("daysNumber")
 public class HomeController {
 
-    private final TradingRepository tradingRepository;
+    private final TransactionRepository transactionRepository;
+    private final BalanceRepository balanceRepository;
 
     @Autowired
-    public HomeController(TradingRepository tradingRepository) {
-        this.tradingRepository = tradingRepository;
+    public HomeController(TransactionRepository transactionRepository,
+                          BalanceRepository balanceRepository) {
+        this.transactionRepository = transactionRepository;
+        this.balanceRepository = balanceRepository;
     }
 
     @GetMapping("/")
-    public String goHome() {
+    public String goHome(Model model) {
+        Balance balance = balanceRepository.findById(1).orElse(null);
+        model.addAttribute("balance", balance);
         return "home";
     }
 
     @GetMapping("/history")
     public String showHistory(@ModelAttribute DaysNumber daysNumber, Model model) {
-        List<TradeHistoryRow> history = tradingRepository.getTradeHistory(daysNumber.getNumber());
+        LocalDateTime fromDate = LocalDateTime.now().minusDays(daysNumber.getNumber());
+        List<Transaction> history = transactionRepository.findByTimeAfter(fromDate);
         model.addAttribute("history", history);
         return "history";
     }
@@ -47,11 +56,6 @@ public class HomeController {
 
         return "redirect:/history";
     }
-
-//    @ModelAttribute(name = "history")
-//    public TradeHistory history() {
-//        return new TradeHistory();
-//    }
 
     @ModelAttribute(name = "daysNumber")
     public DaysNumber daysNumber() {
