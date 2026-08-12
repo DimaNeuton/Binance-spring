@@ -1,3 +1,5 @@
+--liquibase formatted sql
+
 --changeset binance-db:1
 create table if not exists transactions
 (

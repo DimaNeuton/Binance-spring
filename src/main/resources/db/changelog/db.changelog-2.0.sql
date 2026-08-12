@@ -1,3 +1,5 @@
+--liquibase formatted sql
+
 -- changeset binance-db:1
 INSERT INTO transactions (time, price, volume, type, commission,
                           btc, usdt, bnb, profit, price_slippage, time_slippage)

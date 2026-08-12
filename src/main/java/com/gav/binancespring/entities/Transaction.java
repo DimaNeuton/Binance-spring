@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,6 +29,8 @@ public class Transaction {
     private BigDecimal btc;
     private BigDecimal usdt;
     private BigDecimal bnb;
+
+    //@Formula()
     private BigDecimal profit;
 
     @Column(name = "price_slippage")

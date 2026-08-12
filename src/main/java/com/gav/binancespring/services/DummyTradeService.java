@@ -1,11 +1,17 @@
 package com.gav.binancespring.services;
 
+import com.gav.binancespring.entities.Balance;
+import com.gav.binancespring.entities.LastBotCondition;
 import com.gav.binancespring.entities.Transaction;
 import com.gav.binancespring.repository.BalanceRepository;
 import com.gav.binancespring.repository.LastBotConditionRepository;
 import com.gav.binancespring.repository.TransactionRepository;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -16,41 +22,72 @@ import java.time.ZoneId;
 
 @Slf4j
 @Service
+//@RequiredArgsConstructor
 public class DummyTradeService implements TradeService {
 
+    private final int STATE_ID = 1;
     private ObjectMapper objectMapper;
     private TransactionRepository transactionRepository;
     private BalanceRepository balanceRepository;
     private LastBotConditionRepository lastBotConditionRepository;
+
+    private final LastBotCondition lastBotCondition;
+    private final Balance balance;
+
     private final BigDecimal commissionRatio = new BigDecimal("0.00075");
     private final BigDecimal volume = new BigDecimal("0.00006");
-    private BigDecimal BtcPrice = null;
-    private BigDecimal BnbPrice = null;
+    private BigDecimal btcPrice = null;
+    private BigDecimal tempBtcPrice = null;
+    private BigDecimal bnbPrice = null;
     private Long requestTime;
     private BigDecimal requestPrice;
     private Long responseTime;
     private BigDecimal responseBtcPrice;
     private BigDecimal commission;
 
+    @Autowired
+    public DummyTradeService(ObjectMapper objectMapper,
+                             TransactionRepository transactionRepository,
+                             BalanceRepository balanceRepository,
+                             LastBotConditionRepository lastBotConditionRepository) {
+        this.objectMapper = objectMapper;
+        this.transactionRepository = transactionRepository;
+        this.balanceRepository = balanceRepository;
+        this.lastBotConditionRepository = lastBotConditionRepository;
+        this.lastBotCondition = lastBotConditionRepository.findById(STATE_ID).orElseThrow();
+        this.balance = balanceRepository.findById(STATE_ID).orElseThrow();
+        log.info("aaa");
+        log.info("BTC = {} USDT = {} BNB = {}", balance.getBtc(), balance.getUsdt(), balance.getBnb());
+        log.info("lastMaxPrice = {} lastMinPrice = {} upMoveDiffLevel = {} downMoveDiffLevel = {} count = {}",
+                lastBotCondition.getLastMaxPrice(),
+                lastBotCondition.getLastMinPrice(),
+                lastBotCondition.getUpMoveDiffLevel(),
+                lastBotCondition.getDownMoveDiffLevel(),
+                lastBotCondition.getTransactionCount());
+    }
+
     @Override
     public void handleMessage(String json) {
 
         try {
             JsonNode root = objectMapper.readTree(json);
+            String streamType = root.path("stream").asString();
+            JsonNode data = root.path("data");
+            if (streamType.equals("btcusdt@bookTicker")) {
 
-            if(root.get("stream").equals("btcusdt@trade")) {
-                if (root.has("p")) {
-                    BtcPrice = new BigDecimal(root.get("p").asText());
-                    BnbPrice = new BigDecimal(root.get("p").asText());                      // ????????????
-                }
+                btcPrice = new BigDecimal(data.get("b").asString());
+                System.out.println("btc = " + btcPrice + "\t\t bnb = " + bnbPrice);
 
-                if (BtcPrice > lastBotCondition.getLastMaxPice().add(BigDecimal.TEN)) {
+                if (btcPrice.compareTo(lastBotCondition.getLastMaxPrice().add(BigDecimal.valueOf(10))) > 0) {
                     trade("SELL");
                 }
 
-                if(BtcPrice < lastBotCondition.getLastMaxPice().subtract(BigDecimal.TEN)) {
+                if (btcPrice.compareTo(lastBotCondition.getLastMinPrice().subtract(BigDecimal.valueOf(10))) < 0) {
                     trade("BUY");
                 }
+            } else {
+                bnbPrice = new BigDecimal(data.get("b").asString());
+                System.out.println("btc = " + btcPrice + "\t\t bnb = " + bnbPrice);
             }
         } catch (Exception e) {
             log.warn("Не удалось разобрать сообщение: {}", json, e);
@@ -58,25 +95,26 @@ public class DummyTradeService implements TradeService {
     }
 
     @Override
+    @Transactional
     public void trade(String type) {
         // отправляем запрос в WS ордеров
         requestTime = Instant.now().toEpochMilli();
-        requestPrice = BtcPrice;
+        requestPrice = btcPrice;
 
         // получаем ответ
         responseTime = Instant.now().toEpochMilli();            // получаем из WS ордеров
-        responseBtcPrice = price;                               // получаем из WS ордеров
+        responseBtcPrice = btcPrice.add(BigDecimal.ONE);                               // получаем из WS ордеров
 
-        commission = ((responseBtcPrice.multiply(volume)).multiply(commissionRatio)).divide(BnbPrice, 8, RoundingMode.HALF_DOWN);
+        commission = ((responseBtcPrice.multiply(volume)).multiply(commissionRatio)).divide(bnbPrice, 8, RoundingMode.HALF_DOWN);
 
         if (type.equals("SELL")) {
-            balance.setBtc(balance.btc.subtract(volume));
-            balance.setUsdt(balance.usdt.add(responseBtcPrice.multiply(volume)));
+            balance.setBtc(balance.getBtc().subtract(volume));
+            balance.setUsdt(balance.getUsdt().add(responseBtcPrice.multiply(volume)));
         } else {
-            balance.setBtc(balance.btc.add(volume));
-            balance.setUsdt(balance.usdt.subtract(responseBtcPrice.multiply(volume)));
+            balance.setBtc(balance.getBtc().add(volume));
+            balance.setUsdt(balance.getUsdt().subtract(responseBtcPrice.multiply(volume)));
         }
-        balance.setBnb(balance.bnb.subtract(commission));
+        balance.setBnb(balance.getBnb().subtract(commission));
 
         lastBotCondition.setLastMaxPrice(responseBtcPrice);
         lastBotCondition.setLastMinPrice(responseBtcPrice);
@@ -107,4 +145,10 @@ public class DummyTradeService implements TradeService {
 
         System.out.println("Test " + type);
     }
+
+//    @PostConstruct
+//    void loadStateFromDB() {
+//        lastBotCondition = lastBotConditionRepository.getById(STATE_ID);
+//        balance = balanceRepository.getById(STATE_ID);
+//    }
 }

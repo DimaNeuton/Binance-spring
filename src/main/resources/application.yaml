@@ -11,10 +11,14 @@ spring:
       show_sql: true
       format_sql: true
       hbm2ddl.auto: validate
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
 binance:
   market:
-    url: wss://stream.binance.com:9443/stream?streams=btcusdt@trade/bnbusdt@trade
+#    url: wss://stream.binance.com:9443/stream?streams=btcusdt@trade/bnbusdt@trade
+    url: wss://stream.binance.com:9443/stream?streams=btcusdt@bookTicker/bnbusdt@bookTicker
+#    url: wss://stream.testnet.binance.vision/stream?streams=btcusdt@trade/bnbusdt@trade
     reconnect-delay: 5s
     retry-max-attempts: 2147483647
     retry-initial-delay: 2s
