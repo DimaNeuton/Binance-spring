@@ -20,12 +20,29 @@
     <h1>Welcome to...</h1>
 <!--    <img th:src="@{/images/ata-logo.png}"/>-->
     <span id="price">—</span>
-    <h1>BTC</h1>
-    <h2 id="btc" th:text="${balance.btc}">—</h2>
-    <h1>USDT</h1>
-    <h2 id="usdt" th:text="${balance.usdt}">—</h2>
-    <h1>BNB</h1>
-    <h2 id="bnb" th:text="${balance.bnb}">—</h2>
+    <h1>DB Balance</h1>
+    <h2>BTC</h2>
+    <h3 id="btcDB" th:text="${balanceDB.btc}">—</h3>
+    <h2>USDT</h2>
+    <h3 id="usdtDB" th:text="${balanceDB.usdt}">—</h3>
+    <h2>BNB</h2>
+    <h3 id="bnbDB" th:text="${balanceDB.bnb}">—</h3>
+    <h1>Real Balance</h1>
+    <h2>BTC</h2>
+    <h3 id="btcReal" th:text="${balanceReal.btc}">—</h3>
+    <h2>USDT</h2>
+    <h3 id="usdtReal" th:text="${balanceReal.usdt}">—</h3>
+    <h2>BNB</h2>
+    <h3 id="bnbReal" th:text="${balanceReal.bnb}">—</h3>
+    <h1>Ручная сделка</h1>
+    <p th:if="${orderMessage}" th:text="${orderMessage}" style="color: green;"></p>
+    <p th:if="${orderError}" th:text="${orderError}" style="color: red;"></p>
+    <form method="POST" th:action="@{/order}">
+        <label for="quantity">Объём (BTC)</label>
+        <input id="quantity" type="number" name="quantity" step="0.00001" min="0.00001" required/>
+        <button type="submit" name="side" value="BUY">Купить</button>
+        <button type="submit" name="side" value="SELL">Продать</button>
+    </form>
     <form method="POST" th:object="${daysNumber}">
         <div>
             <h3>Количество дней для выборки</h3>

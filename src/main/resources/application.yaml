@@ -8,7 +8,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     properties.hibernate:
-      show_sql: true
+      show_sql: false
       format_sql: true
       hbm2ddl.auto: validate
   liquibase:
@@ -16,9 +16,20 @@ spring:
 
 binance:
   market:
-#    url: wss://stream.binance.com:9443/stream?streams=btcusdt@trade/bnbusdt@trade
-    url: wss://stream.binance.com:9443/stream?streams=btcusdt@bookTicker/bnbusdt@bookTicker
-#    url: wss://stream.testnet.binance.vision/stream?streams=btcusdt@trade/bnbusdt@trade
+#    url: wss://stream.binance.com:9443/stream?streams=btcusdt@bookTicker/bnbusdt@bookTicker
+    url: wss://stream.testnet.binance.vision/stream?streams=btcusdt@bookTicker/bnbusdt@bookTicker
+    reconnect-delay: 5s
+    retry-max-attempts: 2147483647
+    retry-initial-delay: 2s
+    retry-max-delay: 60s
+    commission-ratio: 0.00075
+  trade:
+#    url: wss://ws-api.binance.com:443/ws-api/v3
+    url: wss://ws-api.testnet.binance.vision:443/ws-api/v3
+    rest-url: https://testnet.binance.vision
+    # Это убрать
+    api-key: "wMyf8jfhlRQiPIW912eN90gS6mdMlU7A45qmzE2ZpiAmvleA8RTpDS2KLEeXaCeZ"
+    private-key-path: "D:/Programming/Projects/Binance-spring/keys/test-prv-key.pem"
     reconnect-delay: 5s
     retry-max-attempts: 2147483647
     retry-initial-delay: 2s

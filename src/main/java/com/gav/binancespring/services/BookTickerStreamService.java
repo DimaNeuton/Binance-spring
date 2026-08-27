@@ -13,6 +13,7 @@ import org.springframework.web.reactive.socket.client.WebSocketClient;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
 import java.net.URI;
@@ -27,6 +28,7 @@ public class BookTickerStreamService implements ApplicationRunner {
     private final WebSocketClient webSocketClient;
     private final BinanceMarketProperties properties;
     private final BookTickerHandlerService bookTickerHandlerService;
+//    private final BinanceWebsocketService binanceWebsocketService;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -54,11 +56,20 @@ public class BookTickerStreamService implements ApplicationRunner {
     private Mono<Void> handleSession(WebSocketSession session) {
         return session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
-                .timeout(Duration.ofSeconds(10))
-                .flatMap(message -> Mono.fromRunnable(() -> bookTickerHandlerService.handleMessage(message)))
+                .onBackpressureLatest()
+                .concatMap(message ->
+                                Mono.fromRunnable(() -> bookTickerHandlerService.handleMessage(message))
+                                        .subscribeOn(Schedulers.boundedElastic()),
+                        1)
                 .doOnError(e -> log.error("Ошибка в потоке сообщений", e))
                 .onErrorResume(e -> Mono.empty())
                 .then();
+//        session.receive()
+//                .map(WebSocketMessage::getPayloadAsText)
+//                .onBackpressureLatest()
+//                .publishOn(Schedulers.boundedElastic(), 1)
+//                .doOnNext(bookTickerHandlerService::handleMessage)
+//                .then();
     }
 
     @PreDestroy

@@ -1,6 +1,9 @@
 package com.gav.binancespring.services;
 
+import java.math.BigDecimal;
+
 public interface TradeService {
-    void handleMessage(String message);
-    void trade(String type);
+    void trade(String type, BigDecimal requestPrice, BigDecimal bnbPrice);
+
+    void analyse(BigDecimal btcPrice, BigDecimal bnbPrice);
 }

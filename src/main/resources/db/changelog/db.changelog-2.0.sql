@@ -15,4 +15,4 @@ INSERT INTO last_bot_condition (last_max_price, last_min_price, up_move_diff_lev
 VALUES (53000, 52500, 53500, 52000, 2);
 
 INSERT INTO balance (btc, usdt, bnb)
-VALUES (0.00023456, 872.51, 15.45);
+VALUES (1, 10000, 1);

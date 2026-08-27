@@ -19,91 +19,46 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
-//@RequiredArgsConstructor
 public class DummyTradeService implements TradeService {
 
     private final int STATE_ID = 1;
-    private ObjectMapper objectMapper;
-    private TransactionRepository transactionRepository;
-    private BalanceRepository balanceRepository;
-    private LastBotConditionRepository lastBotConditionRepository;
-
-    private final LastBotCondition lastBotCondition;
     private final Balance balance;
+    private final LastBotCondition lastBotCondition;
+
+    private final TransactionRepository transactionRepository;
+    private final BalanceRepository balanceRepository;
+    private final LastBotConditionRepository lastBotConditionRepository;
 
     private final BigDecimal commissionRatio = new BigDecimal("0.00075");
     private final BigDecimal volume = new BigDecimal("0.00006");
-    private BigDecimal btcPrice = null;
-    private BigDecimal tempBtcPrice = null;
-    private BigDecimal bnbPrice = null;
-    private Long requestTime;
-    private BigDecimal requestPrice;
+
     private Long responseTime;
     private BigDecimal responseBtcPrice;
     private BigDecimal commission;
 
     @Autowired
-    public DummyTradeService(ObjectMapper objectMapper,
-                             TransactionRepository transactionRepository,
+    public DummyTradeService(TransactionRepository transactionRepository,
                              BalanceRepository balanceRepository,
                              LastBotConditionRepository lastBotConditionRepository) {
-        this.objectMapper = objectMapper;
         this.transactionRepository = transactionRepository;
         this.balanceRepository = balanceRepository;
         this.lastBotConditionRepository = lastBotConditionRepository;
         this.lastBotCondition = lastBotConditionRepository.findById(STATE_ID).orElseThrow();
         this.balance = balanceRepository.findById(STATE_ID).orElseThrow();
-        log.info("aaa");
-        log.info("BTC = {} USDT = {} BNB = {}", balance.getBtc(), balance.getUsdt(), balance.getBnb());
-        log.info("lastMaxPrice = {} lastMinPrice = {} upMoveDiffLevel = {} downMoveDiffLevel = {} count = {}",
-                lastBotCondition.getLastMaxPrice(),
-                lastBotCondition.getLastMinPrice(),
-                lastBotCondition.getUpMoveDiffLevel(),
-                lastBotCondition.getDownMoveDiffLevel(),
-                lastBotCondition.getTransactionCount());
     }
 
     @Override
-    public void handleMessage(String json) {
-
-        try {
-            JsonNode root = objectMapper.readTree(json);
-            String streamType = root.path("stream").asString();
-            JsonNode data = root.path("data");
-            if (streamType.equals("btcusdt@bookTicker")) {
-
-                btcPrice = new BigDecimal(data.get("b").asString());
-                System.out.println("btc = " + btcPrice + "\t\t bnb = " + bnbPrice);
-
-                if (btcPrice.compareTo(lastBotCondition.getLastMaxPrice().add(BigDecimal.valueOf(10))) > 0) {
-                    trade("SELL");
-                }
-
-                if (btcPrice.compareTo(lastBotCondition.getLastMinPrice().subtract(BigDecimal.valueOf(10))) < 0) {
-                    trade("BUY");
-                }
-            } else {
-                bnbPrice = new BigDecimal(data.get("b").asString());
-                System.out.println("btc = " + btcPrice + "\t\t bnb = " + bnbPrice);
-            }
-        } catch (Exception e) {
-            log.warn("Не удалось разобрать сообщение: {}", json, e);
-        }
-    }
-
-    @Override
-    @Transactional
-    public void trade(String type) {
-        // отправляем запрос в WS ордеров
-        requestTime = Instant.now().toEpochMilli();
-        requestPrice = btcPrice;
+    public void trade(String type, BigDecimal requestPrice, BigDecimal bnbPrice) {
+        // отправляем запрос в WS ордеров и ждем ответа
+        Long requestTime = Instant.now().toEpochMilli();
 
         // получаем ответ
-        responseTime = Instant.now().toEpochMilli();            // получаем из WS ордеров
-        responseBtcPrice = btcPrice.add(BigDecimal.ONE);                               // получаем из WS ордеров
+        responseTime = Instant.now().toEpochMilli();
+        responseBtcPrice = requestPrice.add(BigDecimal.ONE);
 
         commission = ((responseBtcPrice.multiply(volume)).multiply(commissionRatio)).divide(bnbPrice, 8, RoundingMode.HALF_DOWN);
 
@@ -120,6 +75,27 @@ public class DummyTradeService implements TradeService {
         lastBotCondition.setLastMinPrice(responseBtcPrice);
         lastBotCondition.setTransactionCount(lastBotCondition.getTransactionCount() + 1);
 
+        saveToDB(type, requestPrice, requestTime);
+
+        System.out.println("Test " + type);
+    }
+
+    @Override
+    public void analyse(BigDecimal btcPrice, BigDecimal bnbPrice) {
+        if (btcPrice == null || bnbPrice == null) {
+            return;
+        }
+        if (btcPrice.compareTo(lastBotCondition.getLastMaxPrice().add(BigDecimal.valueOf(80))) > 0) {
+            trade("SELL", btcPrice, bnbPrice);
+        }
+
+        if (btcPrice.compareTo(lastBotCondition.getLastMinPrice().subtract(BigDecimal.valueOf(80))) < 0) {
+            trade("BUY", btcPrice, bnbPrice);
+        }
+    }
+
+    @Transactional
+    public void saveToDB(String type, BigDecimal requestPrice, Long requestTime) {
         // сохраняем транзакцию
         transactionRepository.save(Transaction.builder()
                 .time(Instant.ofEpochMilli(responseTime)
@@ -142,13 +118,5 @@ public class DummyTradeService implements TradeService {
 
         // сохраняем параметры бота
         lastBotConditionRepository.save(lastBotCondition);
-
-        System.out.println("Test " + type);
     }
-
-//    @PostConstruct
-//    void loadStateFromDB() {
-//        lastBotCondition = lastBotConditionRepository.getById(STATE_ID);
-//        balance = balanceRepository.getById(STATE_ID);
-//    }
 }
