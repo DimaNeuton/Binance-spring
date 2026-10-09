@@ -3,44 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" th:href="@{/styles.css}"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<div id="tradingHistory">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>time</th>
-            <th>type</th>
-            <th>price</th>
-            <th>volume</th>
-            <th>commission</th>
-            <th>btc</th>
-            <th>usdt</th>
-            <th>bnb</th>
-            <th>timeSlippage</th>
-            <th>priceSlippage</th>
-            <th>profit</th>
-        </tr>
-        </thead>
-        <tbody id="body">
-        <tr th:each="row : ${history}">
-            <td th:text="${row.id != null ? row.id : '—'}">1</td>
-            <td th:text="${row.time != null ? #temporals.format(row.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
-            <td th:text="${row.type != null ? row.type : '—'}">buy</td>
-            <td th:text="${row.price != null ? row.price : '—'}">price</td>
-            <td th:text="${row.volume != null ? row.volume : '—'}">qty</td>
-            <td th:text="${row.commission != null ? row.commission : '—'}">commission</td>
-            <td th:text="${row.btc != null ? row.btc : '—'}">btc</td>
-            <td th:text="${row.usdt != null ? row.usdt : '—'}">usdt</td>
-            <td th:text="${row.bnb != null ? row.bnb : '—'}">bnb</td>
-            <td th:text="${row.timeSlippage != null ? row.timeSlippage : '—'}">time slippage</td>
-            <td th:text="${row.priceSlippage != null ? row.priceSlippage : '—'}">price slippage</td>
-            <td th:text="${row.profit != null ? row.profit : '—'}">usdt</td>
-        </tr>
-        </tbody>
-    </table>
+<div class="container">
+    <div class="card">
+        <h3>history</h3>
+        <div class="positions-scroll" style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>time</th>
+                    <th>type</th>
+                    <th>price</th>
+                    <th>volume</th>
+                    <th>commission</th>
+                    <th>btc</th>
+                    <th>usdt</th>
+                    <th>bnb</th>
+                    <th>time slippage</th>
+                    <th>price slippage</th>
+                    <th>profit</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${history}">
+                    <td th:text="${row.id != null ? row.id : '—'}">1</td>
+                    <td th:text="${row.time != null ? #temporals.format(row.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
+                    <td th:classappend="${row.type != null and row.type.toString() == 'BUY'} ? 'trade-buy' : 'trade-sell'"
+                        th:text="${row.type != null ? row.type : '—'}">buy</td>
+                    <td th:text="${row.price != null ? row.price : '—'}">—</td>
+                    <td th:text="${row.volume != null ? row.volume : '—'}">—</td>
+                    <td th:text="${row.commission != null ? row.commission : '—'}">—</td>
+                    <td th:text="${row.btc != null ? row.btc : '—'}">—</td>
+                    <td th:text="${row.usdt != null ? row.usdt : '—'}">—</td>
+                    <td th:text="${row.bnb != null ? row.bnb : '—'}">—</td>
+                    <td th:text="${row.timeSlippage != null ? row.timeSlippage : '—'}">—</td>
+                    <td th:text="${row.priceSlippage != null ? row.priceSlippage : '—'}">—</td>
+                    <td th:classappend="${row.profit != null and row.profit >= 0} ? 'trade-profit-pos' : 'trade-profit-neg'"
+                        th:text="${row.profit != null ? row.profit : '—'}">—</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 </body>
 </html>

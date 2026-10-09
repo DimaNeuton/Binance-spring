@@ -1,12 +1,13 @@
 package com.gav.binancespring;
 
-import com.gav.binancespring.entities.Balance;
 import com.gav.binancespring.entities.Transaction;
 import com.gav.binancespring.repository.BalanceRepository;
 import com.gav.binancespring.dto.DaysNumber;
 
 import com.gav.binancespring.repository.TransactionRepository;
 import com.gav.binancespring.services.BinanceAccountService;
+import com.gav.binancespring.services.CurrentStatusHolder;
+import com.gav.binancespring.services.DummyTradeService;
 import com.gav.binancespring.services.OrderStreamService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,31 +33,34 @@ public class HomeController {
     private final BalanceRepository balanceRepository;
     private final BinanceAccountService binanceAccountService;
     private final OrderStreamService orderStreamService;
+    private final DummyTradeService dummyTradeService;
+    private final CurrentStatusHolder currentStatusHolder;
 
     @Autowired
     public HomeController(TransactionRepository transactionRepository,
                           BalanceRepository balanceRepository,
                           BinanceAccountService binanceAccountService,
-                          OrderStreamService orderStreamService) {
+                          OrderStreamService orderStreamService,
+                          DummyTradeService dummyTradeService,
+                          CurrentStatusHolder currentStatusHolder) {
         this.transactionRepository = transactionRepository;
         this.balanceRepository = balanceRepository;
         this.binanceAccountService = binanceAccountService;
         this.orderStreamService = orderStreamService;
+        this.dummyTradeService = dummyTradeService;
+        this.currentStatusHolder = currentStatusHolder;
     }
 
     @GetMapping("/")
     public String goHome(Model model) {
-        Balance balanceDB = balanceRepository.findById(1).orElse(null);
-        Balance balanceReal = binanceAccountService.fetchWalletBalance();
-        model.addAttribute("balanceDB", balanceDB);
-        model.addAttribute("balanceReal", balanceReal);
+        model.addAttribute("currentStatus", currentStatusHolder.get());
         return "home";
     }
 
     @GetMapping("/history")
     public String showHistory(@ModelAttribute DaysNumber daysNumber, Model model) {
         LocalDateTime fromDate = LocalDateTime.now().minusDays(daysNumber.getNumber());
-        List<Transaction> history = transactionRepository.findByTimeAfter(fromDate);
+        List<Transaction> history = transactionRepository.findByTimeAfterOrderByIdDesc(fromDate);
         model.addAttribute("history", history);
         return "history";
     }

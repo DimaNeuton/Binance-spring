@@ -7,7 +7,7 @@ public record OrderResult(
         int status,
         BigDecimal price,
         BigDecimal executedQty,
+        BigDecimal commission,
         long transactTime,
         String errorMessage
-) {
-}
+) {}

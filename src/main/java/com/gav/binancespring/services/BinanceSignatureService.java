@@ -1,6 +1,6 @@
 package com.gav.binancespring.services;
 
-import com.gav.binancespring.config.BinanceTradeProperties;
+import com.gav.binancespring.config.BinanceProperties;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -19,7 +19,7 @@ public class BinanceSignatureService {
 
     private final PrivateKey privateKey;
 
-    public BinanceSignatureService(BinanceTradeProperties properties) {
+    public BinanceSignatureService(BinanceProperties properties) {
         this.privateKey = loadPrivateKey(Path.of(properties.privateKeyPath()));
     }
 

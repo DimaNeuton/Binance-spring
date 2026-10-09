@@ -1,1 +1,81 @@
 Как хранить приватные данные
+стоит ли использовать binance sdk
+какие способы создания вебсокет соединение лучше
+уточнить про наследование на примере метода execute() в StandardWebsocketClient
+стоит ли использовать StandardWebsocketClient с костылями для переподключения или лучше все-таки reactor и WebFlux
+проверить желтые подчеркивания и серые Exception
+
+понять Autowired и RequiredArgsConstructor
+сделать enums
+переделать подключение к binance account без использованеи реактора
+сделать нормальное отображение времени и округление цен
+сделать обработку частично исполненных ордеров и других проблем с ордерами
+
+
+запрос
+{
+    "method":"order.place",
+    "id":"2cd92bb7-0aed-46e0-a108-2ebbc1ca1da4",
+    "params":{
+        "symbol":"BTCUSDT",
+        "side":"BUY",
+        "quantity":0.00006,
+        "apiKey":"wMyf8jfhlRQiPIW912eN90gS6mdMlU7A45qmzE2ZpiAmvleA8RTpDS2KLEeXaCeZ",
+        "type":"MARKET",
+        "timestamp":1788263086094
+    }
+}
+ответ
+{
+    "id":"ac3bc4cb-9f3a-4534-b3c7-40ed8eb40377",
+    "status":200,
+    "result":{
+        "symbol":"BTCUSDT",
+        "orderId":4566615,
+        "orderListId":-1,
+        "clientOrderId":"8TH3azBaeear9FrFIEdFgI",
+        "transactTime":1789979077163,
+        "price":"0.00000000",
+        "origQty":"0.00007000",
+        "executedQty":"0.00007000",
+        "origQuoteOrderQty":"0.00000000",
+        "cummulativeQuoteQty":"5.75238930",
+        "status":"FILLED",
+        "timeInForce":"GTC",
+        "type":"MARKET",
+        "side":"SELL",
+        "workingTime":1789979077163,
+        "fills":[
+            {
+                "price":"82176.99000000",
+                "qty":"0.00007000",
+                "commission":"0.00000000",
+                "commissionAsset":"USDT",
+                "tradeId":1317774
+            }],
+        "selfTradePreventionMode":"EXPIRE_MAKER"
+    },
+    "rateLimits":[
+        {
+            "rateLimitType":"ORDERS",
+            "interval":"SECOND",
+            "intervalNum":10,
+            "limit":50,
+            "count":1
+        },
+        {
+            "rateLimitType":"ORDERS",
+            "interval":"DAY",
+            "intervalNum":1,
+            "limit":160000,
+            "count":2
+        },
+        {
+            "rateLimitType":"REQUEST_WEIGHT",
+            "interval":"MINUTE",
+            "intervalNum":1,
+            "limit":6000,
+            "count":25
+        }
+        ]
+    }

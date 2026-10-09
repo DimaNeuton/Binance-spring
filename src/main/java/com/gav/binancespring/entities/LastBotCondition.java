@@ -35,4 +35,13 @@ public class LastBotCondition {
 
     @Column(name = "transaction_count")
     private Long transactionCount;
+
+    @Column
+    private BigDecimal profit;
+
+    @Column(name = "sales_volume")
+    private BigDecimal salesVolume;
+
+    @Column(name = "purchases_volume")
+    private BigDecimal purchasesVolume;
 }

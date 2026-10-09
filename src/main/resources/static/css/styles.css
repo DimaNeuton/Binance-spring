@@ -1,0 +1,763 @@
+.table {
+    width: 100%;
+    border: none;
+    margin-bottom: 20px;
+}
+.table thead th {
+    font-weight: bold;
+    text-align: left;
+    border: none;
+    padding: 10px 15px;
+    background: #d8d8d8;
+    font-size: 14px;
+}
+.table thead tr th:first-child {
+    border-radius: 8px 0 0 8px;
+}
+.table thead tr th:last-child {
+    border-radius: 0 8px 8px 0;
+}
+.table tbody td {
+    text-align: left;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    vertical-align: top;
+}
+.table tbody tr:nth-child(even){
+    background: #f3f3f3;
+}
+.table tbody tr td:first-child {
+    border-radius: 8px 0 0 8px;
+}
+.table tbody tr td:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+/*body {*/
+/*    font-family: Arial, sans-serif;*/
+/*    background: #f5f5f5;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.container {*/
+/*    max-width: 1400px;*/
+/*    width: 100%;*/
+/*    margin: 20px auto;*/
+/*}*/
+
+/*!* Верхняя часть *!*/
+/*.top {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: flex-start;*/
+/*}*/
+
+/*!* Балансы *!*/
+/*.balances {*/
+/*    width: 45%;*/
+/*}*/
+
+/*.balance-table {*/
+/*    margin-top: 30px;*/
+/*    border-top: 1px solid #000;*/
+/*}*/
+
+/*.row {*/
+/*    display: grid;*/
+/*    grid-template-columns: 100px 1fr 1fr;*/
+/*    padding: 10px 0;*/
+/*    font-size: 26px;*/
+/*}*/
+
+/*.row.header {*/
+/*    font-size: 18px;*/
+/*    border-bottom: 1px solid #000;*/
+/*}*/
+
+/*.row div:nth-child(2) {*/
+/*    border-right: 1px solid #000;*/
+/*}*/
+
+/*.row div:nth-child(2),*/
+/*.row div:nth-child(3) {*/
+/*    text-align: right;*/
+/*}*/
+
+/*!* Позиции *!*/
+/*.positions {*/
+/*    width: 50%;*/
+/*    padding-left: 40px;*/
+/*}*/
+
+/*.tables {*/
+/*    display: flex;*/
+/*    gap: 40px;*/
+/*    margin-top: 20px;*/
+/*}*/
+
+/*.positions table {*/
+/*    width: 100%;*/
+/*    border-collapse: collapse;*/
+/*    font-size: 24px;*/
+/*}*/
+
+/*.positions th {*/
+/*    border-bottom: 1px solid #000;*/
+/*    padding: 10px;*/
+/*    text-align: right;*/
+/*}*/
+
+/*.positions td {*/
+/*    padding: 10px;*/
+/*    text-align: right;*/
+/*}*/
+
+/*!* разделительная линия между колонками *!*/
+/*.sales td:first-child,*/
+/*.sales th:first-child {*/
+/*    border-right: 1px solid #000;*/
+/*}*/
+
+/*.purchases td:first-child,*/
+/*.purchases th:first-child {*/
+/*    border-right: 1px solid #000;*/
+/*}*/
+
+/*!* Нижняя часть *!*/
+/*.bottom {*/
+/*    margin-top: 80px;*/
+/*}*/
+
+/*.trade-form {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    gap: 10px;*/
+/*    margin-top: 20px;*/
+/*}*/
+
+/*.trade-form input {*/
+/*    width: 200px;*/
+/*    height: 25px;*/
+/*}*/
+
+/*.trade-form button {*/
+/*    padding: 5px 10px;*/
+/*    cursor: pointer;*/
+/*}*/
+
+/*.history {*/
+/*    margin-top: 30px;*/
+/*}*/
+
+/** {*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*.sales td,*/
+/*.sales th,*/
+/*.purchases td,*/
+/*.purchases th {*/
+/*    width: 50%;*/
+/*}*/
+
+/*.positions tr {*/
+/*    border-bottom: 1px solid #eee;*/
+/*}*/
+
+/*h2 {*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*h3 {*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*.positions td,*/
+/*.row div:nth-child(2),*/
+/*.row div:nth-child(3) {*/
+/*    font-family: monospace;*/
+/*}*/
+
+/*.positions th:first-child {*/
+/*    text-align: left;*/
+/*}*/
+
+/*.positions tbody tr:hover {*/
+/*    background: #f9f9f9;*/
+/*}*/
+
+/* ---------- Общие настройки ---------- */
+:root {
+    --bg:        #0e0f11;   /* почти чёрный фон страницы */
+    --card-bg:   #1a1c1f;   /* карточка — между белым и чёрным */
+    --border:    #2a2d31;   /* неброские линии таблиц */
+    --text:      #e6e8ea;   /* светлый текст */
+    --muted:     #8a9099;   /* приглушённый (заголовки колонок) */
+    --accent:    #00B0F0;   /* акцент — оставляем фирменный */
+    --subtle-bg: #141518;   /* фон за status-info и uptime — темнее карточки */
+    --hover-bg:  #22252a;   /* ховер строк */
+    --radius:    0;
+    --gap:       20px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 24px;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+h1, h2, h3 { margin: 0 0 12px; font-weight: 600; }
+
+/* ---------- Контейнер страницы ---------- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.top { /* карточка с ценой */ }
+
+/* ---------- Сетка карточек ---------- */
+.cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* 2 колонки на десктопе */
+    gap: var(--gap);
+    align-items: start;              /* карточки не растягиваются по высоте */
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+/* Колонки растягиваются на высоту строки grid'а — низ обеих совпадёт */
+.cards > .column {
+    align-self: stretch;
+}
+
+/* ---------- Карточка ---------- */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+}
+
+/* ---------- Таблица ---------- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.data-table th,
+.data-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+    font-weight: 500;
+    color: var(--muted);
+    font-size: 13px;
+    text-transform: lowercase;
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.data-table tbody tr:hover { background: var(--hover-bg); }
+
+/* ---------- Форма ---------- */
+input[type="number"] {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #1e2329;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+button:hover { opacity: .9; }
+
+.validationError { color: #f6465d; font-size: 12px; }
+
+/* ---------- Адаптив: смартфон ---------- */
+@media (max-width: 767px) {
+    body { padding: 12px; }
+
+    .cards {
+        grid-template-columns: 1fr;  /* 1 колонка — всё в столбик */
+    }
+
+    .card { padding: 16px; }
+}
+
+/* ============================================================
+   Раскладка карточек: слева балансы, справа сделки
+   (двумя таблицами внутри одной карточки)
+   ============================================================ */
+
+/* Сетка из двух карточек на десктопе */
+/*.cards {*/
+/*    display: grid;*/
+/*    grid-template-columns: 1fr 1fr;*/
+/*    gap: var(--gap, 20px);*/
+/*    align-items: start;*/
+/*}*/
+
+/* ------------------------------------------------------------
+   Адаптив: смартфон — всё в столбик
+   ------------------------------------------------------------ */
+
+/* ============================================================
+   Ограничение высоты карточки сделок + прокрутка
+   ============================================================ */
+
+/* Карточка сделок не выше видимой области экрана на десктопе */
+.positions-card {
+    display: flex;
+    flex-direction: column;
+    /* 100vh минус отступы body (24px * 2) и заголовок h1 с отступом */
+    max-height: calc(100vh - 140px);
+}
+
+/* Область, которая будет прокручиваться, если таблицы не влезают */
+.positions-scroll {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;             /* обязательное условие для работы overflow во flex-контейнере */
+    /* аккуратный скроллбар */
+    scrollbar-width: thin;
+    scrollbar-color: #3a3d42 transparent;
+}
+
+.positions-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.positions-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.positions-scroll::-webkit-scrollbar-thumb {
+    background-color: #3a3d42;
+    border-radius: 3px;
+}
+
+/* На смартфоне — фиксированная высота = 10 строк данных.
+   Считаем: строка ~ 41px (10px padding сверху + 10px снизу + ~21px текст),
+   плюс шапка таблицы (~41px), плюс заголовок h4 (~28px).
+   10 * 41 + 41 + 28 + 8 (margin) ≈ 487px. Округлим до 420–460px. */
+@media (max-width: 767px) {
+    .positions-card {
+        max-height: none;      /* сбрасываем ограничение по vh */
+    }
+
+    .positions-scroll {
+        max-height: 420px;     /* примерно 10 строк в каждой таблице */
+    }
+
+    .cards {
+        grid-template-columns: 1fr;   /* карточки в столбик */
+    }
+
+    .app-header + .app-header-line + .column,
+    .app-header + .app-header-line + .column + .column {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .app-title {
+        font-size: 18px;
+        white-space: normal;   /* разрешаем перенос, если длинное */
+        text-align: right;
+    }
+
+    .app-logo img {
+        height: 26px;
+    }
+}
+
+/* ============================================================
+   Карточка статистики (uptime + errors + visits)
+   ============================================================ */
+
+/* Общие отступы внутри карточки */
+.stats-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Строка с uptime */
+.stats-uptime {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--subtle-bg);
+    border-radius: 0;
+}
+
+.stats-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.stats-value {
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;  /* цифры моноширинные — не «прыгают» */
+}
+
+/* Секция с таблицей (Errors / Last visits) */
+.stats-section h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* Ограничение высоты таблиц внутри карточки статистики.
+   Ошибок может быть много, посещений — ровно 5, поэтому
+   даём обеим таблицам одинаковое ограничение. */
+/*.stats-scroll {*/
+/*    max-height: 220px;*/
+/*    overflow-y: auto;*/
+/*    scrollbar-width: thin;*/
+/*    scrollbar-color: #c9ccd1 transparent;*/
+/*}*/
+
+/*.stats-scroll::-webkit-scrollbar {*/
+/*    width: 6px;*/
+/*}*/
+
+/*.stats-scroll::-webkit-scrollbar-track {*/
+/*    background: transparent;*/
+/*}*/
+
+/*.stats-scroll::-webkit-scrollbar-thumb {*/
+/*    background-color: #c9ccd1;*/
+/*    border-radius: 3px;*/
+/*}*/
+
+/* Прилипающая шапка таблиц при прокрутке внутри карточки */
+.stats-scroll .data-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 1;
+}
+
+/* На смартфоне — уменьшаем высоту скролл-области */
+/*@media (max-width: 767px) {*/
+/*    .stats-scroll {*/
+/*        max-height: 180px;*/
+/*    }*/
+/*}*/
+
+/* Карточка status — колонка: верхний контент, затем блок внизу */
+.status-card {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Блок с балансами прижимается к низу карточки */
+.balances-bottom {
+    margin-top: auto;             /* «толкает» блок вниз */
+    padding-top: 20px;            /* отступ от первой таблицы */
+    display: flex;
+    justify-content: center;      /* центрирует таблицу по горизонтали */
+}
+
+/* Центрирование заголовков и ячеек */
+.data-table--centered th,
+.data-table--centered td {
+    text-align: center;
+}
+
+/* Обёртка-фон для четырёх строк */
+.status-info {
+    background: var(--subtle-bg);       /* тот же фон, что у .stats-uptime */
+    border-radius: 0;          /* без скруглений — как просили */
+    padding: 4px 12px;         /* отступ от краёв фона */
+}
+
+/* Убираем разделительные линии у таблицы внутри status */
+.status-info-table th,
+.status-info-table td {
+    border-bottom: none;
+}
+
+/* Убираем ховер-подсветку строк (не нужна внутри «бейджа») */
+.status-info-table tbody tr:hover {
+    background: transparent;
+}
+
+/* Значения — по правому краю */
+.status-info-table tbody td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;   /* цифры не «прыгают» при обновлении */
+}
+
+/* Шапка растягивается на обе колонки grid'а, первая строка */
+.app-header {
+    grid-column: 1 / -1;       /* от первой до последней колонки */
+    grid-row: 1;
+    display: flex;
+    justify-content: flex-end;   /* лого влево, название вправо */
+    align-items: center;
+    gap: 4px;
+    padding: 0 0 12px;         /* отступ от линии */
+}
+
+/* Логотип */
+.app-logo {
+    display: flex;
+    align-items: center;
+}
+
+.app-logo img {
+    height: 32px;              /* подгоните под свой логотип */
+    width: auto;
+    display: block;
+}
+
+/* Название — справа, без лишних отступов */
+.app-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: .2px;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* Линия под шапкой — тоже на обе колонки */
+.app-header-line {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: var(--gap);   /* отступ до карточек */
+}
+
+/* Колонки с карточками сдвигаются в третью строку */
+/*.app-header + .app-header-line + .column {*/
+/*    grid-column: 1;*/
+/*    grid-row: 3;*/
+/*}*/
+
+/*.app-header + .app-header-line + .column + .column {*/
+/*    grid-column: 2;*/
+/*    grid-row: 3;*/
+/*}*/
+
+.chart-card {
+    flex: 1 1 auto;          /* занимает остаток правой колонки */
+    min-height: 200px;       /* защита от сжатия до нуля */
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-wrap {
+    position: relative;
+    width: 100%;
+    height: auto;            /* больше не фиксируем — растягивается flex'ом */
+    min-height: 0;
+    margin-top: 4px;
+    flex: 1 1 auto;
+}
+
+.chart-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Цвета осей/текста берём из темы */
+    color: var(--muted);
+}
+
+/* Элементы графика */
+.chart-axis-line {
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.chart-grid-line {
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: .5;
+}
+
+.chart-label {
+    fill: var(--muted);
+    font-size: 11px;
+    font-family: inherit;
+    dominant-baseline: middle;
+}
+
+.chart-line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.chart-dot {
+    fill: var(--accent);
+    stroke: var(--card-bg);
+    stroke-width: 1;
+    r: 2.5;
+}
+
+@media (max-width: 767px) {
+    .chart-card {
+        flex: 0 0 auto;      /* на телефоне не растягиваем */
+    }
+
+    .chart-wrap {
+        height: 240px;   /* на телефоне — компактнее */
+    }
+}
+
+/* Тип сделки: buy / sell */
+.trade-buy {
+    color: #0ecb81;                /* зелёный — «покупка» */
+    font-weight: 500;
+}
+
+.trade-sell {
+    color: #f6465d;                /* красный — «продажа» */
+    font-weight: 500;
+}
+
+/* Профит: положительный / отрицательный */
+.trade-profit-pos {
+    color: #0ecb81;                /* зелёный */
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.trade-profit-neg {
+    color: #f6465d;                /* красный */
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Дата и время — моноширинный шрифт, чтобы не «дёргались» цифры */
+.positions-card .data-table td:nth-child(2) {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ID — тоже ровные цифры */
+.positions-card .data-table td:nth-child(1) {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+}
+
+/* Цена и объём — выровнены по правому краю */
+.positions-card .data-table td:nth-child(4),
+.positions-card .data-table td:nth-child(5),
+.positions-card .data-table td:nth-child(6),
+.positions-card .data-table th:nth-child(4),
+.positions-card .data-table th:nth-child(5),
+.positions-card .data-table th:nth-child(6) {
+    text-align: right;
+}
+
+/* ============================================================
+   Форма "show history" под таблицей last trades
+   ============================================================ */
+
+.history-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 6px 12px;              /* ↓ высота плашки ≈ 41px, как uptime */
+    background: var(--subtle-bg);
+}
+
+.history-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Поле — 28px, чтобы плашка осталась низкой */
+.history-input {
+    width: 72px;
+    height: 28px;                   /* ← было 32 */
+    padding: 0 8px;
+    margin: 0;
+    box-sizing: border-box;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--text);
+    font-size: 13px;                /* чуть меньше — под 28px */
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    line-height: 26px;              /* 28 − 2 бордера */
+}
+
+.history-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.history-input::-webkit-outer-spin-button,
+.history-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.history-input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Кнопка — тоже 28px */
+.history-button {
+    margin-left: auto;
+    height: 28px;                   /* ← было 32 */
+    padding: 0 14px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 0;
+    background: var(--accent);
+    color: #1e2329;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 28px;
+    cursor: pointer;
+}
+
+.history-button:hover {
+    opacity: .9;
+}

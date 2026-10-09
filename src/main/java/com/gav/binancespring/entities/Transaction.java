@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,10 +24,16 @@ public class Transaction {
     private String type;
     private BigDecimal price;
     private BigDecimal volume;
+
+    @Column(name = "cumulative_volume")
+    private BigDecimal cumulativeVolume;
     private BigDecimal commission;
     private BigDecimal btc;
     private BigDecimal usdt;
     private BigDecimal bnb;
+//
+//    @Column(name = "profit_taking")
+//    private boolean profitTaking;
 
     //@Formula()
     private BigDecimal profit;

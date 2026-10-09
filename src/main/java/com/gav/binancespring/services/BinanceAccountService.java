@@ -1,6 +1,7 @@
 package com.gav.binancespring.services;
 
-import com.gav.binancespring.config.BinanceTradeProperties;
+import com.gav.binancespring.config.BinanceProperties;
+import com.gav.binancespring.dto.OrderStatusResponse;
 import com.gav.binancespring.entities.Balance;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.util.Map;
 @Service
 public class BinanceAccountService {
 
-    private final BinanceTradeProperties properties;
+    private final BinanceProperties properties;
     private final BinanceSignatureService signatureService;
     private final WebClient webClient = WebClient.create();
     private final ObjectMapper objectMapper;
@@ -53,6 +54,24 @@ public class BinanceAccountService {
         return parseBalance(body);
     }
 
+    public OrderStatusResponse queryOrderByClientId(String clientOrderId) {
+        long timestamp = System.currentTimeMillis();
+        String query = "symbol=BTCUSDT&origClientOrderId=" + clientOrderId + "&timestamp=" + timestamp;
+        String signature = URLEncoder.encode(
+                signatureService.sign(Map.of(
+                        "symbol", "BTCUSDT",
+                        "origClientOrderId", clientOrderId,
+                        "timestamp", timestamp)), StandardCharsets.UTF_8);
+        URI uri = URI.create(properties.restUrl() + "/api/v3/order?" + query + "&signature=" + signature);
+        String body = webClient.get()
+                .uri(uri)
+                .header("X-MBX-APIKEY", properties.apiKey())
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        return objectMapper.readValue(body, OrderStatusResponse.class);
+    }
+
     private Balance parseBalance(String json) {
         JsonNode root = objectMapper.readTree(json);
         BigDecimal btc = BigDecimal.ZERO;
@@ -64,9 +83,15 @@ public class BinanceAccountService {
             BigDecimal free = new BigDecimal(balance.path("free").asString());
 
             switch (asset) {
-                case "BTC": btc = free; break;
-                case "USDT": usdt = free; break;
-                case "BNB": bnb = free; break;
+                case "BTC":
+                    btc = free;
+                    break;
+                case "USDT":
+                    usdt = free;
+                    break;
+                case "BNB":
+                    bnb = free;
+                    break;
             }
         }
         return Balance.builder()

@@ -1,5 +1,6 @@
 package com.gav.binancespring.repository;
 
+import com.gav.binancespring.dto.CalcTransaction;
 import com.gav.binancespring.entities.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,5 +10,6 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByTimeAfter(LocalDateTime from);
+    List<Transaction> findByTimeAfterOrderByIdDesc(LocalDateTime from);
+    List<CalcTransaction> findIdAndTimeAndPriceAndVolumeByType(String type);
 }

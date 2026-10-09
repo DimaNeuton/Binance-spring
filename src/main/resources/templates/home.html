@@ -1,11 +1,209 @@
 <!DOCTYPE html>
-<!--<html lang="en">-->
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="ru">
 <head>
-    <title>Title</title>
+    <meta charset="UTF-8">
+    <title>Preview</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+<body>
+
+<div class="container">
+
+    <!-- Две колонки: слева — балансы + статистика, справа — сделки -->
+    <div class="cards">
+
+        <!-- Шапка: лого слева, название справа -->
+        <div class="app-header">
+
+            <h1 class="app-title">automatic trading algorithms</h1>
+
+            <div class="app-logo">
+                <img th:src="@{/images/logo.png}" alt="logo">
+            </div>
+
+        </div>
+
+        <!-- Разделительная линия под шапкой -->
+        <div class="app-header-line"></div>
+
+        <!-- ЛЕВАЯ КОЛОНКА -->
+        <div class="column">
+
+            <!-- Карточка со статусом -->
+            <div class="card status-card">
+                <h3>status</h3>
+
+                <div class="status-info">
+                    <table class="data-table status-info-table">
+                        <tbody>
+                        <tr>
+                            <td>current price</td>
+                            <td id="price">—</td>
+                        </tr>
+                        <tr>
+                            <td>current profit</td>
+                            <td th:text="${currentStatus.currentProfit}">—</td>
+                        </tr>
+                        <tr>
+                            <td>transactions closed/total</td>
+                            <td th:text="|${currentStatus.closedTransactions}/${currentStatus.totalTransactions}|">—
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>trading volume</td>
+                            <td th:text="${currentStatus.tradingVolume}">—</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="balances-bottom">
+                    <table class="data-table data-table--centered">
+                        <thead>
+                        <tr>
+                            <th>btc</th>
+                            <th>usdt</th>
+                            <th>bnb</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:text="${currentStatus.balanceBtcReal}">—</td>
+                            <td th:text="${currentStatus.balanceUsdtReal}">—</td>
+                            <td th:text="${currentStatus.balanceBnbReal}">—</td>
+                        </tr>
+                        <tr>
+                            <td th:text="${currentStatus.balanceBtcDb}">—</td>
+                            <td th:text="${currentStatus.balanceUsdtDb}">—</td>
+                            <td th:text="${currentStatus.balanceBnbDb}">—</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Карточка статистики -->
+            <div class="card stats-card">
+                <h3>statistics</h3>
+
+                <div class="stats-uptime">
+                    <span class="stats-label">uptime:</span>
+                    <span class="stats-value"
+                          id="uptime"
+                          th:attr="data-start=${currentStatus.uptime}">—</span>
+                </div>
+
+                <div class="stats-section">
+                    <h4>last visits</h4>
+                    <div class="stats-scroll">
+                        <table class="data-table">
+                            <thead>
+                            <tr>
+                                <th>time</th>
+                                <th>ip</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>14:30:12</td>
+                                <td>192.168.1.10</td>
+                            </tr>
+                            <tr>
+                                <td>14:21:55</td>
+                                <td>192.168.1.24</td>
+                            </tr>
+                            <tr>
+                                <td>13:58:09</td>
+                                <td>10.0.0.5</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА -->
+        <div class="column">
+
+            <!-- Карточка с последними сделками -->
+            <div class="card positions-card">
+                <h3>last trades</h3>
+                <div class="positions-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>date time</th>
+                            <th>type</th>
+                            <th>price</th>
+                            <th>volume</th>
+                            <th>profit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:text="${currentStatus.transaction1 != null ? currentStatus.transaction1.id : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction1 != null ? #temporals.format(currentStatus.transaction1.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
+                            <td th:class="${currentStatus.transaction1 == null ? 'not' : (currentStatus.transaction1.type == 'BUY' ? 'trade-buy' : 'trade-sell')}"
+                                th:text="${currentStatus.transaction1 != null ? currentStatus.transaction1.type : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction1 != null ? currentStatus.transaction1.price : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction1 != null ? currentStatus.transaction1.volume : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction1 != null ? currentStatus.transaction1.profit : '—'}">—</td>
+                        </tr>
+                        <tr>
+                            <td th:text="${currentStatus.transaction2 != null ? currentStatus.transaction2.id : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction2 != null ? #temporals.format(currentStatus.transaction2.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
+                            <td th:class="${currentStatus.transaction2 == null ? 'not' : (currentStatus.transaction2.type == 'BUY' ? 'trade-buy' : 'trade-sell')}"
+                                th:text="${currentStatus.transaction2 != null ? currentStatus.transaction2.type : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction2 != null ? currentStatus.transaction2.price : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction2 != null ? currentStatus.transaction2.volume : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction2 != null ? currentStatus.transaction2.profit : '—'}">—</td>
+                        </tr>
+                        <tr>
+                            <td th:text="${currentStatus.transaction3 != null ? currentStatus.transaction3.id : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction3 != null ? #temporals.format(currentStatus.transaction3.time, 'yyyy-MM-dd HH:mm:ss') : '—'}">—</td>
+                            <td th:class="${currentStatus.transaction3 == null ? 'not' : (currentStatus.transaction3.type == 'BUY' ? 'trade-buy' : 'trade-sell')}"
+                                th:text="${currentStatus.transaction3 != null ? currentStatus.transaction3.type : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction3 != null ? currentStatus.transaction3.price : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction3 != null ? currentStatus.transaction3.volume : '—'}">—</td>
+                            <td th:text="${currentStatus.transaction3 != null ? currentStatus.transaction3.profit : '—'}">—</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- НОВЫЙ БЛОК: форма истории -->
+                <form class="history-form" method="POST" th:action="@{/}" th:object="${daysNumber}">
+                    <span class="history-label">history</span>
+                    <input type="number" min="1" class="history-input" th:field="*{number}">
+                    <span class="history-label">days</span>
+                    <button type="submit" class="history-button">show</button>
+                </form>
+            </div>
+
+
+            <!-- Карточка с графиком -->
+            <div class="card chart-card">
+                <h3>profit chart</h3>
+                <div class="chart-wrap">
+                    <svg id="profitChart" class="chart-svg"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script th:inline="javascript">
+    /*<![CDATA[*/
+    const data = /*[[${currentStatus.profits}]]*/ {};
+    /*]]>*/
+</script>
+
+<script>
+
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -15,44 +213,256 @@
     };
     ws.onerror = () => console.error('WebSocket error');
     ws.onclose = () => console.warn('WebSocket closed');
+
+    (function () {
+        const el = document.getElementById('uptime');
+        if (!el) return;
+
+        const startStr = el.getAttribute('data-start');
+        const start = new Date(startStr);
+        if (isNaN(start.getTime())) {
+            el.textContent = '—';
+            console.warn('Uptime: не удалось распарсить дату запуска:', startStr);
+            return;
+        }
+
+        function formatUptime(ms) {
+            if (ms < 0) ms = 0;
+
+            const totalSec = Math.floor(ms / 1000);
+            const days = Math.floor(totalSec / 86400);
+            const hours = Math.floor((totalSec % 86400) / 3600);
+            const minutes = Math.floor((totalSec % 3600) / 60);
+            const seconds = totalSec % 60;
+
+            const parts = [];
+            if (days > 0) parts.push(days + 'd');
+            if (days > 0 || hours > 0) parts.push(hours + 'h');
+            if (days > 0 || hours > 0 || minutes > 0) parts.push(minutes + 'm');
+            parts.push(seconds + 's');
+
+            return parts.join(' ');
+        }
+
+        function tick() {
+            const now = Date.now();
+            el.textContent = formatUptime(now - start.getTime());
+        }
+
+        tick();                       // сразу, чтобы не ждать секунду
+        setInterval(tick, 1000);      // и потом каждую секунду
+    })();
+
+    (function () {
+        // Превращаем { "1": 0.0001, "2": -0.0015 } в [{id: 1, value: 0.0001}, ...]
+        const chartData = Object.entries(data)
+            .map(([k, v]) => ({id: Number(k), value: Number(v)}))
+            .filter(p => Number.isFinite(p.id) && Number.isFinite(p.value))
+            .sort((a, b) => a.id - b.id);
+        // =================================
+
+        const svg = document.getElementById('profitChart');
+        if (!svg) return;
+
+        function draw() {
+            const rect = svg.getBoundingClientRect();
+            const W = rect.width;
+            const H = rect.height;
+
+            // Отступы под подписи осей
+            const pad = {top: 16, right: 16, bottom: 32, left: 52};
+
+            const innerW = W - pad.left - pad.right;
+            const innerH = H - pad.top - pad.bottom;
+
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            svg.innerHTML = '';
+
+            if (!chartData.length || innerW <= 0 || innerH <= 0) return;
+
+            // ----- диапазон по X -----
+            const xs = chartData.map(d => d.id);
+            const xMinData = Math.min(...xs);
+            const xMaxData = Math.max(...xs);
+            const xRange = niceRange(xMinData, xMaxData);
+
+            // ----- диапазон по Y -----
+            const ys = chartData.map(d => d.value);
+            const yMinData = Math.min(...ys);
+            const yMaxData = Math.max(...ys);
+            const yRange = niceRange(yMinData, yMaxData);
+
+            // ----- функции преобразования -----
+            const xScale = v =>
+                pad.left + ((v - xRange.min) / (xRange.max - xRange.min)) * innerW;
+            const yScale = v =>
+                pad.top + innerH - ((v - yRange.min) / (yRange.max - yRange.min)) * innerH;
+
+            // ----- позиция оси X (там, где y = 0, или на границе) -----
+            let xAxisY;
+            if (yRange.min <= 0 && yRange.max >= 0) {
+                xAxisY = yScale(0);
+            } else if (yRange.min > 0) {
+                xAxisY = pad.top + innerH;   // всё положительное — ось внизу
+            } else {
+                xAxisY = pad.top;            // всё отрицательное — ось вверху
+            }
+
+            // ----- сетка и подписи по Y -----
+            for (let v = yRange.min; v <= yRange.max + 1e-9; v += yRange.step) {
+                const y = yScale(v);
+
+                const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                gridLine.setAttribute('x1', pad.left);
+                gridLine.setAttribute('x2', pad.left + innerW);
+                gridLine.setAttribute('y1', y);
+                gridLine.setAttribute('y2', y);
+                gridLine.setAttribute('class', 'chart-grid-line');
+                svg.appendChild(gridLine);
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', pad.left - 8);
+                label.setAttribute('y', y);
+                label.setAttribute('text-anchor', 'end');
+                label.setAttribute('class', 'chart-label');
+                label.textContent = formatNumber(v);
+                svg.appendChild(label);
+            }
+
+
+            // ----- сетка и подписи по X -----
+            for (let v = xRange.min; v <= xRange.max + 1e-9; v += xRange.step) {
+                const x = xScale(v);
+
+                const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                gridLine.setAttribute('x1', x);
+                gridLine.setAttribute('x2', x);
+                gridLine.setAttribute('y1', pad.top);
+                gridLine.setAttribute('y2', pad.top + innerH);
+                gridLine.setAttribute('class', 'chart-grid-line');
+                svg.appendChild(gridLine);
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', x);
+                label.setAttribute('y', xAxisY + 14);
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('class', 'chart-label');
+                label.textContent = formatNumber(v);
+                svg.appendChild(label);
+            }
+
+            // ----- оси -----
+            // Y-ось — слева, как была
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', pad.left);
+            yAxis.setAttribute('x2', pad.left);
+            yAxis.setAttribute('y1', pad.top);
+            yAxis.setAttribute('y2', pad.top + innerH);
+            yAxis.setAttribute('class', 'chart-axis-line');
+            svg.appendChild(yAxis);
+
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', pad.left);
+            xAxis.setAttribute('x2', pad.left + innerW);
+            xAxis.setAttribute('y1', xAxisY);
+            xAxis.setAttribute('y2', xAxisY);
+            xAxis.setAttribute('class', 'chart-axis-line');
+            svg.appendChild(xAxis);
+
+            // ----- линия графика -----
+            const pathData = chartData
+                .slice()
+                .sort((a, b) => a.id - b.id)
+                .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(d.id)} ${yScale(d.value)}`)
+                .join(' ');
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('class', 'chart-line');
+            svg.appendChild(path);
+
+            // ----- точки -----
+            chartData.forEach(d => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', xScale(d.id));
+                circle.setAttribute('cy', yScale(d.value));
+                circle.setAttribute('class', 'chart-dot');
+                svg.appendChild(circle);
+            });
+        }
+
+        // ============================================================
+        // Утилиты
+        // ============================================================
+
+        /**
+         * Подбирает «красивый» диапазон [min, max] и шаг деления.
+         * Например: (3, 97) → { min: 0, max: 100, step: 20 }
+         */
+        function niceRange(minVal, maxVal) {
+            if (minVal === maxVal) {
+                // Все значения одинаковые — сделаем окно вокруг них
+                minVal -= 1;
+                maxVal += 1;
+            }
+
+            const range = maxVal - minVal;
+            // Хотим примерно 5 делений — но не меньше 3, не больше 8
+            const rawStep = range / 5;
+            const step = niceStep(rawStep);
+
+            const min = Math.floor(minVal / step) * step;
+            const max = Math.ceil(maxVal / step) * step;
+
+            return {min, max, step};
+        }
+
+        /**
+         * Округляет «шаг» до ближайшего из ряда 1, 2, 5, 10, 20, 50, …
+         * (включая 0.1, 0.2, 0.5 и т.д.)
+         */
+        function niceStep(rawStep) {
+            if (rawStep <= 0) return 1;
+            const exp = Math.floor(Math.log10(rawStep));
+            const base = Math.pow(10, exp);
+            const norm = rawStep / base;   // 1..10
+
+            let nice;
+            if (norm <= 1) nice = 1;
+            else if (norm <= 2) nice = 2;
+            else if (norm <= 5) nice = 5;
+            else nice = 10;
+
+            return nice * base;
+        }
+
+        /**
+         * Форматирует число для подписи оси:
+         * - 0 → "0"
+         * - 1000 → "1 000"
+         * - 0.001 → "0.001"
+         */
+        function formatNumber(v) {
+            if (Math.abs(v) < 1e-9) return '0';
+
+            const abs = Math.abs(v);
+            if (abs >= 1000 || (abs < 0.01 && abs > 0)) {
+                return v.toExponential(1).replace('e+', 'e');
+            }
+
+            // Убираем «хвост» из нулей: 0.30000000000004 → 0.3
+            const rounded = Math.round(v * 1000) / 1000;
+            return rounded.toLocaleString('ru-RU');
+        }
+
+        // Рисуем сразу и при изменении размера окна
+        draw();
+        window.addEventListener('resize', draw);
+
+        // Опционально: перерисовка при переключении темы / добавлении данных
+        window.redrawProfitChart = draw;
+    })();
 </script>
-<body>
-    <h1>Welcome to...</h1>
-<!--    <img th:src="@{/images/ata-logo.png}"/>-->
-    <span id="price">—</span>
-    <h1>DB Balance</h1>
-    <h2>BTC</h2>
-    <h3 id="btcDB" th:text="${balanceDB.btc}">—</h3>
-    <h2>USDT</h2>
-    <h3 id="usdtDB" th:text="${balanceDB.usdt}">—</h3>
-    <h2>BNB</h2>
-    <h3 id="bnbDB" th:text="${balanceDB.bnb}">—</h3>
-    <h1>Real Balance</h1>
-    <h2>BTC</h2>
-    <h3 id="btcReal" th:text="${balanceReal.btc}">—</h3>
-    <h2>USDT</h2>
-    <h3 id="usdtReal" th:text="${balanceReal.usdt}">—</h3>
-    <h2>BNB</h2>
-    <h3 id="bnbReal" th:text="${balanceReal.bnb}">—</h3>
-    <h1>Ручная сделка</h1>
-    <p th:if="${orderMessage}" th:text="${orderMessage}" style="color: green;"></p>
-    <p th:if="${orderError}" th:text="${orderError}" style="color: red;"></p>
-    <form method="POST" th:action="@{/order}">
-        <label for="quantity">Объём (BTC)</label>
-        <input id="quantity" type="number" name="quantity" step="0.00001" min="0.00001" required/>
-        <button type="submit" name="side" value="BUY">Купить</button>
-        <button type="submit" name="side" value="SELL">Продать</button>
-    </form>
-    <form method="POST" th:object="${daysNumber}">
-        <div>
-            <h3>Количество дней для выборки</h3>
-            <input type=number th:field="*{number}"/>
-            <span class="validationError"
-                  th:if="${#fields.hasErrors('number')}"
-                  th:errors="*{number}">Number error</span>
-            <br/>
-            <button>Show history</button>
-        </div>
-    </form>
+
 </body>
 </html>

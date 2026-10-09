@@ -1,20 +1,26 @@
 --liquibase formatted sql
 
---changeset binance-db:1
+--changeset binance-db:1 runAlways:true
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS balance CASCADE;
+DROP TABLE IF EXISTS last_bot_condition CASCADE;
+
 create table if not exists transactions
 (
-    id             BIGSERIAL PRIMARY KEY,
-    time           TIMESTAMP,
-    price          DECIMAL,
-    volume         DECIMAL,
-    type           VARCHAR(5),
-    commission     DECIMAL,
-    btc            DECIMAl,
-    usdt           DECIMAl,
-    bnb            DECIMAl,
-    profit         DECIMAl,
-    price_slippage DECIMAL,
-    time_slippage  BIGINT
+    id                BIGSERIAL PRIMARY KEY,
+    time              TIMESTAMP,
+    price             DECIMAL,
+    volume            DECIMAL,
+    cumulative_volume DECIMAL,
+    type              VARCHAR(5),
+    commission        DECIMAL,
+    btc               DECIMAl,
+    usdt              DECIMAl,
+    bnb               DECIMAl,
+--     profit_taking  BOOLEAN,
+    profit            DECIMAl,
+    price_slippage    DECIMAL,
+    time_slippage     BIGINT
 );
 
 create table if not exists balance
@@ -32,5 +38,8 @@ create table if not exists last_bot_condition
     last_min_price       DECIMAL,
     up_move_diff_level   DECIMAL,
     down_move_diff_level DECIMAL,
-    transaction_count    BIGINT
+    transaction_count    BIGINT,
+    profit               DECIMAL,
+    sales_volume         DECIMAL,
+    purchases_volume     DECIMAL
 );
