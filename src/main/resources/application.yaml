@@ -1,13 +1,13 @@
 server:
   address: 127.0.0.1
-  port: 8081
+  port: 8082
   servlet:
-    context-path: /onlydb
+    context-path: /simple
 spring:
   application:
     name: Binance-spring
   datasource:
-    url: jdbc:postgresql://localhost:5432/binance_db_1
+    url: jdbc:postgresql://localhost:5432/binance_db_2
     #    username: postgres
     username: bduser
     password: 11127765

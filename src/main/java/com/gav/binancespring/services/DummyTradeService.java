@@ -38,13 +38,19 @@ public class DummyTradeService implements TradeService {
     private final BinanceAccountService binanceAccountService;
     private final CalculationService calculationService;
 
-    private final BigDecimal commissionRatio = new BigDecimal("0.001");
+    private final BigDecimal commissionRatio = new BigDecimal("0.00075");
     private final BigDecimal volume = new BigDecimal("0.00007");
+    BigDecimal minVolume = BigDecimal.ZERO;
 
     private BigDecimal previousBtcBuyPrice = BigDecimal.valueOf(1000_000);
     private BigDecimal previousBtcSellPrice = BigDecimal.ZERO;
 
-    TreeSet<CalcTransaction> calcSales = new TreeSet<>(Collections.reverseOrder());
+    private final boolean unprofitableFactor = true;
+    private final BigDecimal buyDiff = BigDecimal.valueOf(0.003);
+    private final BigDecimal sellDiff = BigDecimal.valueOf(0.008);
+    private final BigDecimal noise = BigDecimal.valueOf(0.0012);
+
+            TreeSet<CalcTransaction> calcSales = new TreeSet<>(Collections.reverseOrder());
     TreeSet<CalcTransaction> calcPurchases = new TreeSet<>();
     TreeSet<CalcTransaction> profitCalcSales = new TreeSet<>(Collections.reverseOrder());
     TreeSet<CalcTransaction> profitCalcPurchases = new TreeSet<>(Collections.reverseOrder());
@@ -94,9 +100,9 @@ public class DummyTradeService implements TradeService {
         this.lastBotCondition.setTransactionCount(1L);
 //        this.balanceDb = balanceRepository.findById(STATE_ID).orElse(binanceAccountService.fetchWalletBalance());
         this.balanceDb = balanceRepository.findById(STATE_ID).orElse(Balance.builder()
-                        .btc(BigDecimal.valueOf(0.0117647))
-                        .usdt(BigDecimal.valueOf(1000))
-                        .bnb(BigDecimal.ONE)
+                .btc(BigDecimal.valueOf(0.0117647))
+                .usdt(BigDecimal.valueOf(1000))
+                .bnb(BigDecimal.ONE)
                 .build());
         balanceDb.setId(STATE_ID);
         this.orderStreamService = orderStreamService;
@@ -123,15 +129,15 @@ public class DummyTradeService implements TradeService {
 
             if (lastBotCondition.getLastMaxPrice() == null || lastBotCondition.getLastMinPrice() == null)
 //                trade("SELL", btcSellPrice, tickerTime, bnbPrice);
-                tradeOnlyDB("SELL", btcSellPrice, tickerTime, bnbPrice);
+                tradeOnlyDB("SELL", btcSellPrice, tickerTime, bnbPrice, volume);
             else {
                 if (btcSellPrice.compareTo(lastBotCondition.getLastMaxPrice().add(BigDecimal.valueOf(175))) > 0) {
 //                    trade("SELL", btcSellPrice, tickerTime, bnbPrice);
-                    tradeOnlyDB("SELL", btcSellPrice, tickerTime, bnbPrice);
+                    tradeOnlyDB("SELL", btcSellPrice, tickerTime, bnbPrice, volume);
                 }
                 if (btcBuyPrice.compareTo(lastBotCondition.getLastMinPrice().subtract(BigDecimal.valueOf(175))) < 0) {
 //                    trade("BUY", btcBuyPrice, tickerTime, bnbPrice);
-                    tradeOnlyDB("BUY", btcBuyPrice, tickerTime, bnbPrice);
+                    tradeOnlyDB("BUY", btcBuyPrice, tickerTime, bnbPrice, volume);
                 }
             }
         } catch (Exception e) {
@@ -139,8 +145,90 @@ public class DummyTradeService implements TradeService {
         }
     }
 
+    public void analyseSimple(BigDecimal btcSellPrice, BigDecimal btcBuyPrice, Long tickerTime, BigDecimal bnbPrice) {
+        try {
+            // Ждем пока появятся все цены
+            if (btcSellPrice == null || btcBuyPrice == null || bnbPrice == null) {
+                log.info("btcSell - {}\tbtcBuy - {}\tbnb - {}", btcSellPrice, btcBuyPrice, bnbPrice);
+                return;
+            }
+
+            // Проверка на манипуляцию
+            if (btcBuyPrice.compareTo(previousBtcBuyPrice.subtract(BigDecimal.valueOf(100))) < 0 ||
+                    btcSellPrice.compareTo(previousBtcSellPrice.add(BigDecimal.valueOf(100))) > 0) {
+                previousBtcBuyPrice = btcBuyPrice;
+                previousBtcSellPrice = btcSellPrice;
+                lastBotCondition.setLastMaxPrice(btcSellPrice);
+                lastBotCondition.setLastMinPrice(btcBuyPrice);
+                lastBotCondition.setUpMoveDiffLevel(btcSellPrice.multiply(BigDecimal.ONE.add(sellDiff)));
+                lastBotCondition.setDownMoveDiffLevel(btcBuyPrice.multiply(BigDecimal.ONE.subtract(buyDiff)));
+                // определяем минимальный объем сделки
+                minVolume = binanceAccountService.defineMinVolume(btcBuyPrice);
+                return;
+            }
+
+            // если текущая цена больше верхнего уровня
+            if (btcSellPrice.compareTo(lastBotCondition.getUpMoveDiffLevel()) > 0) {
+                // если цена больше последней максимальной
+                if (btcSellPrice.compareTo(lastBotCondition.getLastMaxPrice()) > 0) {
+                    // переопределяем максимальную и пропускаем цикл
+                    lastBotCondition.setLastMaxPrice(btcSellPrice);
+                    return;
+                }
+                // если нет, смотрим дальше
+                // если цена меньше чем максимальная - noise
+                if (btcSellPrice.compareTo(lastBotCondition.getLastMaxPrice().multiply(BigDecimal.ONE.subtract(noise))) < 0) {
+                    // если баланса хватает для продажи
+                    if (balanceDb.getBtc().compareTo(minVolume) > 0) {
+                        // определяем количество для продажи и продаем
+                        tradeSimple("SELL", btcSellPrice, tickerTime, bnbPrice, minVolume);
+                    } else // если не хватает
+                        // если включена торговля в минус
+                        if (unprofitableFactor) {
+                            // если баланса хватает для покупки
+                            if (balanceDb.getUsdt().compareTo(minVolume.multiply(BigDecimal.valueOf(2))) > 0) {
+                                // покупаем половину
+                                tradeSimple("BUY", btcSellPrice, tickerTime, bnbPrice,
+                                        balanceDb.getUsdt().divide(btcSellPrice.add(btcSellPrice), 5, RoundingMode.CEILING));
+                            } // если не хватает, ничего не делаем
+                        } // если выключена, ничего не делаем
+                }
+                return; // пропускаем цикл
+            }
+
+            // если текущая цена меньше нижнего уровня
+            if (btcBuyPrice.compareTo(lastBotCondition.getDownMoveDiffLevel()) < 0) {
+                // если цена меньше минимальной уровня
+                if (btcBuyPrice.compareTo(lastBotCondition.getLastMinPrice()) < 0) {
+                    // переопределяем минимальную и пропускаем цикл
+                    lastBotCondition.setLastMinPrice(btcBuyPrice);
+                    return;
+                }
+                // если цена больше чем минимальная + noise
+                if (btcBuyPrice.compareTo(lastBotCondition.getLastMinPrice().multiply(BigDecimal.ONE.add(noise))) > 0) {
+                    // если баланса хватает
+                    if (balanceDb.getUsdt().compareTo(minVolume.multiply(btcBuyPrice)) > 0) {
+                        // определяем количество и покупаем
+                        tradeSimple("BUY", btcBuyPrice, tickerTime, bnbPrice, minVolume);
+                    } else // если не хватает
+                        // если включена торговля в минус
+                        if (unprofitableFactor) {
+                            // если баланса хватает
+                            if (balanceDb.getBtc().compareTo(minVolume.multiply(BigDecimal.valueOf(2))) > 0) {
+                                // продаем половину баланса
+                                tradeSimple("SELL", btcBuyPrice, tickerTime, bnbPrice,
+                                        balanceDb.getBtc().divide(BigDecimal.valueOf(2), 5, RoundingMode.CEILING));
+                            } // если не хватает, ничего не делаем
+                        } // если выключена, ничего не делаем
+                }
+            }
+        } catch (Exception e) {
+            log.error("analyse simple error", e);
+        }
+    }
+
     @Override
-    public void trade(String type, BigDecimal tickerPrice, Long tickerTime, BigDecimal bnbPrice) {
+    public void trade(String type, BigDecimal tickerPrice, Long tickerTime, BigDecimal bnbPrice, BigDecimal volume) {
         try {
             var orderResult = orderStreamService.placeMarketOrder(type, volume);
 
@@ -162,7 +250,7 @@ public class DummyTradeService implements TradeService {
 
             Balance balanceReal = binanceAccountService.fetchWalletBalance();
 
-            updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal);
+            updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal, volume);
 
             log.info("Test " + type + "\t\tbtcBalance: " + balanceDb.getBtc() + " - " + balanceReal.getBtc() +
                     "\t\tusdtBalance: " + balanceDb.getUsdt() + " - " + balanceReal.getUsdt() +
@@ -171,13 +259,13 @@ public class DummyTradeService implements TradeService {
 //            log.info("last " + type + " " + orderResult.price());
         } catch (OrderUnknownException e) {
             log.warn("Ответ по ордеру потерян. Сверяем через RSET: {}", e.getClientOrderId());
-            reconcileUnknownOrder(e.getClientOrderId(), type, tickerPrice, tickerTime);
+            reconcileUnknownOrder(e.getClientOrderId(), type, tickerPrice, tickerTime, volume);
         } catch (Exception e) {
             log.error("Error in trade " + type, e);
         }
     }
 
-    public void tradeOnlyDB(String type, BigDecimal tickerPrice, Long tickerTime, BigDecimal bnbPrice) {
+    public void tradeOnlyDB(String type, BigDecimal tickerPrice, Long tickerTime, BigDecimal bnbPrice, BigDecimal volume) {
 
         try {
             Long responseTime = Instant.now().toEpochMilli();
@@ -194,20 +282,48 @@ public class DummyTradeService implements TradeService {
 
             Balance balanceReal = balanceDb;
 
-            updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal);
+            updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal, volume);
 
         } catch (Exception e) {
             log.error("Error in trade " + type, e);
         }
     }
 
+    public void tradeSimple(String type, BigDecimal tickerPrice, Long tickerTime, BigDecimal bnbPrice, BigDecimal volume) {
+        try {
+            Long responseTime = Instant.now().toEpochMilli();
+            BigDecimal responseBtcPrice = tickerPrice;
+
+            BigDecimal commission = (responseBtcPrice.multiply(volume)).multiply(commissionRatio).setScale(8, RoundingMode.HALF_DOWN);
+            if (type.equals("SELL")) {
+                balanceDb.setBtc(balanceDb.getBtc().subtract(volume));
+                balanceDb.setUsdt((balanceDb.getUsdt().add(responseBtcPrice.multiply(volume))).subtract(commission).setScale(8, RoundingMode.FLOOR));
+            } else {
+                balanceDb.setBtc(balanceDb.getBtc().add(volume).subtract(volume.multiply(commissionRatio)).setScale(8, RoundingMode.FLOOR));
+                balanceDb.setUsdt(balanceDb.getUsdt().subtract(responseBtcPrice.multiply(volume)).setScale(8, RoundingMode.FLOOR));
+            }
+
+            Balance balanceReal = balanceDb;
+
+            updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal, volume);
+
+        } catch (Exception e) {
+            log.error("tradeSimple Exception: " + e.getMessage());
+        }
+    }
+
     @Transactional
-    public void updateData(String type, BigDecimal tickerPrice, Long tickerTime, Long responseTime, BigDecimal responseBtcPrice, BigDecimal commission, Balance balanceReal) {
+    public void updateData(String type, BigDecimal tickerPrice, Long tickerTime, Long responseTime,
+                           BigDecimal responseBtcPrice, BigDecimal commission, Balance balanceReal, BigDecimal volume) {
 
         try {
             lastBotCondition.setLastMaxPrice(responseBtcPrice);
             lastBotCondition.setLastMinPrice(responseBtcPrice);
             lastBotCondition.setTransactionCount(lastBotCondition.getTransactionCount() + 1);
+            lastBotCondition.setUpMoveDiffLevel(responseBtcPrice.multiply(BigDecimal.ONE.add(sellDiff)));
+            lastBotCondition.setDownMoveDiffLevel(responseBtcPrice.multiply(BigDecimal.ONE.subtract(buyDiff)));
+            minVolume = binanceAccountService.defineMinVolume(responseBtcPrice);
+
 
             // считаем профит
             if (type.equals("SELL")) {
@@ -385,8 +501,7 @@ public class DummyTradeService implements TradeService {
         return type.equals("SELL") ? profitCalcSales : profitCalcPurchases;
     }
 
-    private void reconcileUnknownOrder(String clientOrderId, String type,
-                                       BigDecimal tickerPrice, Long tickerTime) {
+    private void reconcileUnknownOrder(String clientOrderId, String type, BigDecimal tickerPrice, Long tickerTime, BigDecimal volume) {
         try {
             var status = binanceAccountService.queryOrderByClientId(clientOrderId);
 
@@ -411,7 +526,7 @@ public class DummyTradeService implements TradeService {
                 Balance balanceReal = binanceAccountService.fetchWalletBalance();
 
                 // Обновляем баланс, сохраняем транзакцию, профит
-                updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal);
+                updateData(type, tickerPrice, tickerTime, responseTime, responseBtcPrice, commission, balanceReal, volume);
 
                 log.info("Test " + type + "\t\tbtcBalance: " + balanceDb.getBtc() + " - " + balanceReal.getBtc() +
                         "\t\tusdtBalance: " + balanceDb.getUsdt() + " - " + balanceReal.getUsdt() +

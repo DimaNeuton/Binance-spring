@@ -12,7 +12,10 @@ import reactor.core.publisher.Mono;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import javax.print.DocFlavor;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -99,5 +102,32 @@ public class BinanceAccountService {
                 .btc(btc)
                 .usdt(usdt)
                 .bnb(bnb).build();
+    }
+
+    public BigDecimal defineMinVolume(BigDecimal price) {
+        String response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("api.binance.com")
+                        .path("/api/v3/exchangeInfo")
+                        .queryParam("symbol", "BTCUSDT")
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        if (response == null) {
+            throw new IllegalStateException("Empty exchangeInfo");
+        }
+
+        JsonNode root = objectMapper.readTree(response);
+        JsonNode filters = root.path("symbols").path(0).path("filters");
+        for (JsonNode filter : filters) {
+            String filterType = filter.path("filterType").asString();
+            if (filterType.equals("NOTIONAL")) {
+                return filter.path("minNotional").decimalValue().divide(price, 5, RoundingMode.CEILING);
+            }
+        }
+        throw new IllegalStateException("Notional filter found");
     }
 }
